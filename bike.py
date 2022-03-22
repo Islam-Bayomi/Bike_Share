@@ -106,6 +106,124 @@ def load_data(city, month, day):
     return df 
 
 
+# Function to calculate all the time-related statistics for the filterd data
+
+def time_stats(df):
+
+    """Displays statistics on the most frequent times of travel."""
+
+    # display the most frequent month
+
+    most_frequent_month = df["month"].mode()[0]
+    
+    print("\n most frequent month is {}".format(most_frequent_month))
+
+    # display the most frequent day
+
+    most_frequent_day = df["day"].mode()[0]
+
+    print("\n most frequent day is {}".format(most_frequent_day))
+
+    # display the most frequent hour
+
+    df["hour"] = df["Start Time"].dt.hour
+
+
+    most_frequent_hour = df["hour"].mode()[0]
+
+
+    print("\n most frequent hour is {}".format(most_frequent_hour))
+
+# Function to calculate station related statistics
+
+def station_stats(df):
+
+    """Displays statistics on the most popular stations and trip."""
+
+    # display the most popular start station
+
+    most_popular_StartStation = df["Start Station"].mode()[0]
+
+    print("\n most popular Start Station is {}".format(most_popular_StartStation))
+
+    # display the most popular end station
+
+    most_popular_EndStation = df["End Station"].mode()[0]
+
+    print("\n most popular End Station is {}".format(most_popular_EndStation))
+
+    # display the most popular trip 
+
+    most_popular_trip = df.groupby(["Start Station","End Station"]).size().sort_values(ascending=False).head(1)
+
+
+    print("\n most popular trip is between : \n {}".format(most_popular_trip))
+
+# Function for trip duration related statistics
+
+def trip_duration_stats(df):
+
+    """Displays statistics on the total and average trip duration."""
+
+    total_trip_duration = df["Trip Duration"].sum()
+
+    print("\n total trip duration equal {}".format(total_trip_duration))
+    
+    Average_trip_duration = df["Trip Duration"].mean()
+
+    print("\n Average trip duration equal {}".format(Average_trip_duration))
+    
+
+# Function to calculate user statistics
+
+def user_stats(df,city):
+
+    """Displays statistics on bikeshare users."""
+
+    # count each user type
+
+    print("\ncount of each user type : \n{}".format(df["User Type"].value_counts()))
+
+    # check if city has gender data and count of each user gender
+
+    if  city in ("chicago","new york"):
+
+        print("count of each user gender : \n{}".format(df["Gender"].value_counts()))
+
+        # count of males
+
+
+        df_male=df.groupby("User Type")["Gender"].apply(
+            lambda x: (x=="Male").sum()).reset_index(name="male count")
+
+        print ("\n count of male user type is : \n {}".format(df_male))
+
+        # count of females
+
+        df_female=df.groupby('User Type')['Gender'].apply(
+            lambda x: (x=='Female').sum()).reset_index(name='female count')
+
+        print ("\n count of female user type is : \n{}".format(df_female))
+
+    # calculate the earliest birth year
+
+        print ("\n oldest user was born at : {} ".format(int(df["Birth Year"].min())))
+
+    # calculate the most recent birth year
+
+        print ("\n youngest user was born at : {} ".format(int(df["Birth Year"].max())))
+
+    # calculate the most common birth year
+
+        print ("\n most common birth year is : {} \n".format(int(df["Birth Year"].mode()[0])))
+
+# Function to display the data frame 
+
+def display_data(df):
+
+    """Displays 5 rows of data from the csv file for the selected city."""
+
+    print("there is 5 rows of data from selected city : \n {}".format(df.head()))
 
 def main():
 
@@ -113,6 +231,11 @@ def main():
     
         city, month, day = get_filters()
         df=load_data(city, month, day)
+        time_stats(df)
+        station_stats(df)
+        trip_duration_stats(df)
+        user_stats(df,city)
+        display_data(df)
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
